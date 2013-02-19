@@ -3,6 +3,11 @@ local TargetValidation = TargetValidation
 
 if PQR_SpellAvailable(PQ_Pillar)
 and IsSpellInRange(GetSpellInfo(PQ_PlagueStrike), &amp;quot;target&amp;quot;) == 1 then
+
+	if PQ_HasEngineering == true then
+		RunMacroText(&amp;quot;/use 10&amp;quot;)
+	end
+
 	CastSpellByName(GetSpellInfo(PQ_Pillar), &amp;quot;player&amp;quot;)
 	return true
 end</Lua><RecastDelay>0</RecastDelay><Target>Target</Target><CancelChannel>False</CancelChannel><SkipUnknown>True</SkipUnknown></Ability><Ability><Name>Raise Dead</Name><Default>false</Default><SpellID>0</SpellID><Actions></Actions><Lua>local PQ_RaiseDead = PQ_RaiseDead
@@ -13,6 +18,15 @@ and PQR_SpellAvailable(PQ_RaiseDead)
 	and (SpecialUnit() or PQ_CD)
 	and IsSpellInRange(GetSpellInfo(PQ_PlagueStrike), &amp;quot;target&amp;quot;) == 1 then
 		CastSpellByName(GetSpellInfo(PQ_RaiseDead), &amp;quot;player&amp;quot;)
+		
+		if PQ_Has2MinCD == true then
+			for _,spell in ipairs(PQ_2MinCDList) do
+				if IsSpellKnown(spell) then
+					CastSpellByName(GetSpellInfo(spell), &amp;quot;player&amp;quot;)
+				end
+			end
+		end
+		
 		return true
 end</Lua><RecastDelay>0</RecastDelay><Target>Target</Target><CancelChannel>False</CancelChannel><SkipUnknown>True</SkipUnknown></Ability><Ability><Name>Empower Rune Weapon</Name><Default>false</Default><SpellID>0</SpellID><Actions></Actions><Lua>local PQ_Empower = PQ_Empower
 
@@ -50,17 +64,28 @@ if PQR_RotationStarted then
 			return true
 		end
 	end
-end
-
-if not PQ_DKLoaded then
-	if not PQ_Frame then 
-		PQ_Frame = CreateFrame(&amp;quot;Frame&amp;quot;)
-		PQ_Frame:RegisterEvent(&amp;quot;UNIT_SPELLCAST_SUCCEEDED&amp;quot;)
-		PQ_Frame:SetScript(&amp;quot;OnEvent&amp;quot;, PQ_Frame_OnEvent)
-		PQ_Frame:Show()
-	end
 	
-	PQ_DKLoaded = true
+	if not PQ_DKLoaded then
+		-- Create Frame
+		if not PQ_Frame then 
+			PQ_Frame = CreateFrame(&amp;quot;Frame&amp;quot;)
+			PQ_Frame:RegisterEvent(&amp;quot;UNIT_SPELLCAST_SUCCEEDED&amp;quot;)
+			PQ_Frame:SetScript(&amp;quot;OnEvent&amp;quot;, PQ_Frame_OnEvent)
+			PQ_Frame:Show()
+		end
+		
+		-- Check for 2 Min CD
+		for _,spell in ipairs(PQ_2MinCDList) do
+			if IsSpellKnown(spell) then
+				PQ_Has2MinCD = true
+				break
+			end
+		end
+		
+		RunMacroText(&amp;quot;/use 10&amp;quot;)
+		
+		PQ_DKLoaded = true
+	end
 end
 
 -- CD Switch
@@ -288,10 +313,9 @@ local PQ_BloodPlague = PQ_BloodPlague
 local TargetValidation = TargetValidation
 
 if PQ_CanCast
-and PQ_OutbreakCD - GetTime() &amp;gt; 5 -- Outbreak ist noch lÃƒÂ¤nger als 5 Sek auf CD
+and PQ_OutbreakCD - GetTime() &amp;gt; 5 -- Outbreak is more than 5 seconds on CD
 and not UnitDebuffID(&amp;quot;target&amp;quot;, PQ_BloodPlague, &amp;quot;player&amp;quot;)
 and TargetValidation(&amp;quot;target&amp;quot;, PQ_PlagueStrike) then
---	SpellCancelQueuedSpell()
 	CastSpellByName(GetSpellInfo(PQ_PlagueStrike), &amp;quot;target&amp;quot;)
 	PQ_ShouldPestilence = true
 	return true
@@ -467,6 +491,18 @@ end</Lua><RecastDelay>0</RecastDelay><Target>Target</Target><CancelChannel>False
 --		return true
 --	end
 --end
+local PQ_GiftOfTheNaaru = PQ_GiftOfTheNaaru
+
+if IsSpellKnown(PQ_GiftOfTheNaaru) then
+	if UnitBuffID(&amp;quot;player&amp;quot;, PQ_GiftOfTheNaaru) and PlayerHP &amp;gt; 30 then
+		return false
+	end
+	
+	if PlayerHP &amp;lt;= 60 and PQR_SpellAvailable(PQ_GiftOfTheNaaru) then
+		CastSpellByName(GetSpellInfo(PQ_GiftOfTheNaaru), &amp;quot;player&amp;quot;)
+		return true
+	end
+end
 
 if PlayerHP &amp;lt;= 45 then
 	local _,ghoul = GetTotemInfo(1)
@@ -517,6 +553,10 @@ for i=1,4 do
         local bossCasting,_,_,_,_,castEnd = UnitCastingInfo(bossCheck)
         local icyPurge = GlyphCheck(58631)
         
+        ------------------------------------------------------------
+        ----------------------- Tier 14 Raids ----------------------
+        ------------------------------------------------------------
+        
         if npcID == 62837 then -- Grand Empress Shek&amp;apos;zeer
         
         	local vision = select(7, UnitDebuffID(&amp;quot;player&amp;quot;, 124862)) -- Vision of Demise
@@ -526,9 +566,17 @@ for i=1,4 do
         		CastSpellByName(GetSpellInfo(PQ_AMS), &amp;quot;player&amp;quot;)
         		return true
         	end
+        	
+        	if PQ_PlayerRace == &amp;quot;Human&amp;quot;
+        	and UnitDebuffID(&amp;quot;player&amp;quot;, 124863) -- Vision of Demise Proc
+        	and PQR_SpellAvailable(PQ_EveryManForHimself) then
+        		CastSpellByName(GetSpellInfo(PQ_EveryManForHimself), &amp;quot;player&amp;quot;)
+        		return true
+        	end
         
         elseif npcID == 62397 then -- Wind Lord Mel&amp;apos;jarak
-        
+        	local mending = GetSpellInfo(122193)
+        	
         	if UnitExists(&amp;quot;focus&amp;quot;) then
         		local impalingDebuff = select(7, UnitDebuffID(&amp;quot;focus&amp;quot;, PQ_ImpalingSpear, &amp;quot;player&amp;quot;))
         		
@@ -544,7 +592,33 @@ for i=1,4 do
         				return true
         			end
         		end
+        		
+        		if UnitCastingInfo(&amp;quot;focus&amp;quot;) == mending
+        		and PQR_SpellAvailable(PQ_MindFreeze) then
+        			CastSpellByName(GetSpellInfo(PQ_MindFreeze), &amp;quot;focus&amp;quot;)
+        			return true
+        		end
        		end
+       		
+       		if UnitCastingInfo(&amp;quot;target&amp;quot;) == mending
+       		and PQR_SpellAvailable(PQ_MindFreeze) then
+       			CastSpellByName(GetSpellInfo(PQ_MindFreeze), &amp;quot;target&amp;quot;)
+        		return true
+       		end
+       		
+       		if UnitExists(&amp;quot;mouseover&amp;quot;)
+       		and UnitCastingInfo(&amp;quot;mouseover&amp;quot;) == mending
+       		and PQR_SpellAvailable(PQ_MindFreeze) then
+       			CastSpellByName(GetSpellInfo(PQ_MindFreeze), &amp;quot;mouseover&amp;quot;)
+        		return true
+       		end
+       		
+       		if PQ_PlayerRace == &amp;quot;Human&amp;quot;
+        	and UnitDebuffID(&amp;quot;player&amp;quot;, 121885) -- Amber Prison
+        	and PQR_SpellAvailable(PQ_EveryManForHimself) then
+        		CastSpellByName(GetSpellInfo(PQ_EveryManForHimself), &amp;quot;player&amp;quot;)
+        		return true
+        	end
         
        	elseif npcID == 62983 then -- Lei Shi
         
@@ -560,6 +634,13 @@ for i=1,4 do
         	if prison and prison - GetTime() &amp;lt;= 2
         	and PQR_SpellAvailable(PQ_AMS) then
         		CastSpellByName(GetSpellInfo(PQ_AMS), &amp;quot;player&amp;quot;)
+        		return true
+        	end
+        	
+        	if PQ_PlayerRace == &amp;quot;Human&amp;quot;
+        	and UnitDebuffID(&amp;quot;player&amp;quot;, 117436) -- Lightning Prison
+        	and PQR_SpellAvailable(PQ_EveryManForHimself) then
+        		CastSpellByName(GetSpellInfo(PQ_EveryManForHimself), &amp;quot;player&amp;quot;)
         		return true
         	end
         	

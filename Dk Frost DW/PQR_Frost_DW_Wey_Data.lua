@@ -1,7 +1,8 @@
 if not PQR_LoadedDataFile then
 	PQR_LoadedDateFile = 1
 	PQ_PlayerName = UnitName("player")
-	print("|cffFFBE69Frost DW Data File - Feb 15, 2013|cffffffff")
+	PQ_PlayerRace = select(2, UnitRace("player"))
+	print("|cffFFBE69Frost DW Data File - Feb 19, 2013|cffffffff")
 end
 
 TargetValidation = nil
@@ -261,6 +262,26 @@ PQ_PotionOfMoguPowerSpell = 105706
 -- Boss Casts
 PQ_ImpalingSpear = 122224
 
+-- Racials
+PQ_GiftOfTheNaaru = 59545 -- Draenei (heal) working
+PQ_EveryManForHimself = 59752 -- Human used
+PQ_BloodFury = 20572 -- Orc (dmg) used
+PQ_Berserking = 26297 -- Troll (dmg/HC like) unused
+PQ_WillOfTheForsaken = 7744 -- Undead unused
+PQ_RocketBarrage = 69041 -- Goblin (dmg, triggers GCD) unused
+
+-- Professions
+PQ_Lifeblood = 121279 -- Herbalism
+PQ_SynapseSprings = 126734 -- Engineering
+
+PQ_HasEngineering = false
+PQ_Has2MinCD = false
+
+PQ_2MinCDList = {
+	PQ_BloodFury,
+	PQ_Lifeblood
+}
+
 -- Combatlog Events
 PQ_Frame = nil
 PQ_CanCast = true
@@ -271,7 +292,7 @@ function PQ_Frame_OnEvent(self, event, ...)
 	
 	local spellID = select(5, ...)
 	
-	if spellID ~= PQ_BloodTap
+	if  spellID ~= PQ_BloodTap
 	and spellID ~= PQ_Pillar
 	and spellID ~= PQ_Empower
 	and spellID ~= PQ_AMS
@@ -283,7 +304,14 @@ function PQ_Frame_OnEvent(self, event, ...)
 	and spellID ~= PQ_HealthStoneSpell
 	and spellID ~= PQ_IceboundFortitude
 	and spellID ~= PQ_PotionOfMoguPowerSpell
-	and spellID ~= PQ_ImpalingSpear then
+	and spellID ~= PQ_ImpalingSpear
+	and spellID ~= PQ_GiftOfTheNaaru
+	and spellID ~= PQ_EveryManForHimself
+	and spellID ~= PQ_BloodFury
+	and spellID ~= PQ_Berserking
+	and spellID ~= PQ_WillOfTheForsaken
+	and spellID ~= PQ_Lifeblood
+	and spellID ~= PQ_SynapseSprings then
 		PQ_GCD = GetTime() + 0.7
 		PQ_CanCast = false
 	end
@@ -297,5 +325,7 @@ function PQ_Frame_OnEvent(self, event, ...)
 	elseif spellID == PQ_ImpalingSpear then
 		PQ_ImpalingSpearCD = GetTime() + 5
 		PQ_CanImpalingSpear = false
+	elseif sleppID == PQ_SynapseSprings then
+		PQ_HasEngineering = true
 	end
 end
