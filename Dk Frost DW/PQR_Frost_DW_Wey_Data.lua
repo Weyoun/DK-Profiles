@@ -282,11 +282,12 @@ function PQ_Frame_OnEvent(self, event, ...)
 	and spellID ~= PQ_DeathGrip
 	and spellID ~= PQ_HealthStoneSpell
 	and spellID ~= PQ_IceboundFortitude
-	and spellID ~= PQ_PotionOfMoguPowerSpell then
+	and spellID ~= PQ_PotionOfMoguPowerSpell
+	and spellID ~= PQ_ImpalingSpear then
 		PQ_GCD = GetTime() + 0.7
 		PQ_CanCast = false
 	end
-		
+			
 	if spellID == PQ_Outbreak then
 		PQ_OutbreakCD = GetTime() + 60
 	elseif spellID == PQ_Pestilence then

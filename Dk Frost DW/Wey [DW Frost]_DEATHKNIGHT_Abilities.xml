@@ -28,6 +28,20 @@ end</Lua><RecastDelay>0</RecastDelay><Target>Target</Target><CancelChannel>False
 -- Load LUA data files.
 if PQR_RotationStarted then
 	PQR_RotationStarted = false
+	
+	PQR_UI = &amp;quot;Blizzard&amp;quot; -- Options: Blizzard, ElvUI
+	--/run print( GetMouseFocus():GetName() or &amp;apos;unknown&amp;apos; )
+	
+	if PQR_UI == &amp;quot;ElvUI&amp;quot; then
+		PQR_OverrideActionBarButton1 = &amp;quot;ElvUI_Bar1Button1&amp;quot;
+		PQR_OverrideActionBarButton2 = &amp;quot;ElvUI_Bar1Button2&amp;quot;
+	elseif PQR_UI == &amp;quot;Blizzard&amp;quot; then
+		PQR_OverrideActionBarButton1 = &amp;quot;OverrideActionBarButton1&amp;quot;
+		PQR_OverrideActionBarButton2 = &amp;quot;OverrideActionBarButton2&amp;quot;
+	else
+		PQR_OverrideActionBarButton1 = &amp;quot;OverrideActionBarButton1&amp;quot;
+		PQR_OverrideActionBarButton2 = &amp;quot;OverrideActionBarButton2&amp;quot;
+	end
 
 	if PQR_LoadLua ~= nil then
 		if PQR_LoadLua(&amp;quot;PQR_Frost_DW_Wey_Data.lua&amp;quot;) == false then
@@ -102,9 +116,9 @@ if IsLeftAltKeyDown() and not GetCurrentKeyBoardFocus() and GetTime() - PQ_DNDTi
 end
 
 if IsMounted() then return true end
-if PQ_CanCast == false and PQ_GCD &amp;lt;= GetTime() then PQ_CanCast = true return true end
-if PQ_CanBT == false and PQ_BTCD &amp;lt;= GetTime() then PQ_CanBT = true return true end
-if PQ_CanImpalingSpear == false and PQ_ImpalingSpearCD &amp;lt;= GetTime() then PQ_CanImpalingSpear = true return true end
+if PQ_CanCast == false and PQ_GCD &amp;lt;= GetTime() then PQ_CanCast = true end
+if PQ_CanBT == false and PQ_BTCD &amp;lt;= GetTime() then PQ_CanBT = true end
+if PQ_CanImpalingSpear == false and PQ_ImpalingSpearCD &amp;lt;= GetTime() then PQ_CanImpalingSpear = true end
 
 RunicPower = UnitPower(&amp;quot;player&amp;quot;)
 PlayerHP   = 100 * UnitHealth(&amp;quot;player&amp;quot;) / UnitHealthMax(&amp;quot;player&amp;quot;)
@@ -148,20 +162,6 @@ for i=1,6,2 do
 		end
 	end
 end</Lua><RecastDelay>0</RecastDelay><Target>Target</Target><CancelChannel>False</CancelChannel><SkipUnknown>True</SkipUnknown></Ability><Ability><Name>[Misc] Pause</Name><Default>false</Default><SpellID>0</SpellID><Actions></Actions><Lua>local PQ_Horn = PQ_Horn
-
---[[        	if UnitExists(&amp;quot;focus&amp;quot;) then
-        		local impalingDebuff = select(7, UnitDebuffID(&amp;quot;focus&amp;quot;, PQ_ImpalingSpear, &amp;quot;player&amp;quot;))
-        		
-        		if impalingDebuff and impalingDebuff - GetTime() &amp;lt; 45 then
-        			if PQ_CanCast
-        			and PQ_CanImpalingSpear then
-        				RunMacroText(&amp;quot;/target [@focus]&amp;quot;)
-        				RunMacroText(&amp;quot;/click ExtraActionButton1&amp;quot;)
-        				RunMacroText(&amp;quot;/targetlasttarget&amp;quot;)
-        				return true
-        			end
-        		end
-       		end]]--
 
 if not UnitAffectingCombat(&amp;quot;player&amp;quot;)
 or (IsLeftShiftKeyDown() and not GetCurrentKeyBoardFocus()) then
@@ -288,7 +288,7 @@ local PQ_BloodPlague = PQ_BloodPlague
 local TargetValidation = TargetValidation
 
 if PQ_CanCast
-and PQ_OutbreakCD - GetTime() &amp;gt; 5 -- Outbreak ist noch lÃ¤nger als 5 Sek auf CD
+and PQ_OutbreakCD - GetTime() &amp;gt; 5 -- Outbreak ist noch lÃƒÂ¤nger als 5 Sek auf CD
 and not UnitDebuffID(&amp;quot;target&amp;quot;, PQ_BloodPlague, &amp;quot;player&amp;quot;)
 and TargetValidation(&amp;quot;target&amp;quot;, PQ_PlagueStrike) then
 --	SpellCancelQueuedSpell()
@@ -320,19 +320,21 @@ else
 		PQ_ShouldPestilence = true
 		return true
 	end
-end</Lua><RecastDelay>0</RecastDelay><Target>Target</Target><CancelChannel>False</CancelChannel><SkipUnknown>True</SkipUnknown></Ability><Ability><Name>Debug</Name><Default>false</Default><SpellID>0</SpellID><Actions></Actions><Lua>local PQ_PlagueStrike = PQ_PlagueStrike
-local TargetValidation = TargetValidation
-
-function TargetValidationDebug(unit, spell)
-	print(&amp;quot;UnitExists &amp;quot;..tostring(UnitExists(unit)))
-	print(&amp;quot;PQR_SpellAvailable &amp;quot;..tostring(PQR_SpellAvailable(spell)))
-	print(&amp;quot;UnitCanAttack &amp;quot;..tostring(UnitCanAttack(&amp;quot;player&amp;quot;, unit) == 1)) 
-	print(&amp;quot;UnitIsDeadOrGhost &amp;quot;..tostring(UnitIsDeadOrGhost(unit))) 
-	print(&amp;quot;PQR_IsOutOfSight &amp;quot;..tostring(PQR_IsOutOfSight(unit, 1)))
-	print(&amp;quot;IsSpellInRange &amp;quot;..tostring(IsSpellInRange(GetSpellInfo(spell), unit) == 1))
-end
-
-TargetValidationDebug(&amp;quot;target&amp;quot;, PQ_PlagueStrike)</Lua><RecastDelay>0</RecastDelay><Target>Target</Target><CancelChannel>False</CancelChannel><SkipUnknown>True</SkipUnknown></Ability><Ability><Name>Blood Tap (&amp;gt;10 and RP &amp;gt; 76 or KM)</Name><Default>false</Default><SpellID>0</SpellID><Actions></Actions><Lua>local PQ_BloodCharge = PQ_BloodCharge
+end</Lua><RecastDelay>0</RecastDelay><Target>Target</Target><CancelChannel>False</CancelChannel><SkipUnknown>True</SkipUnknown></Ability><Ability><Name>Debug</Name><Default>false</Default><SpellID>0</SpellID><Actions></Actions><Lua>if UnitExists(&amp;quot;focus&amp;quot;) then
+	local impalingDebuff = select(7, UnitDebuffID(&amp;quot;focus&amp;quot;, PQ_ImpalingSpear, &amp;quot;player&amp;quot;))
+        		
+    if impalingDebuff and impalingDebuff - GetTime() &amp;lt; 43 then
+		if PQ_CanCast
+		and not UnitCastingInfo(&amp;quot;player&amp;quot;)
+        and PQ_CanImpalingSpear then
+        	print(&amp;quot;Casting Spear&amp;quot;)
+        	RunMacroText(&amp;quot;/target [@focus]&amp;quot;)
+        	RunMacroText(&amp;quot;/click ExtraActionButton1&amp;quot;)
+        	RunMacroText(&amp;quot;/targetlasttarget&amp;quot;)
+        	return true
+        	end
+    end
+end</Lua><RecastDelay>0</RecastDelay><Target>Target</Target><CancelChannel>False</CancelChannel><SkipUnknown>True</SkipUnknown></Ability><Ability><Name>Blood Tap (&amp;gt;10 and RP &amp;gt; 76 or KM)</Name><Default>false</Default><SpellID>0</SpellID><Actions></Actions><Lua>local PQ_BloodCharge = PQ_BloodCharge
 local PQ_KillingMachine = PQ_KillingMachine
 local PQ_BloodTap = PQ_BloodTap
 local TargetValidation = TargetValidation
@@ -517,9 +519,10 @@ for i=1,4 do
         
         if npcID == 62837 then -- Grand Empress Shek&amp;apos;zeer
         
-        	local vision = select(7, UnitDebuffID(&amp;quot;player&amp;quot;, 124863)) -- Vision of Demise
+        	local vision = select(7, UnitDebuffID(&amp;quot;player&amp;quot;, 124862)) -- Vision of Demise
         
-        	if vision and vision - GetTime() &amp;lt;= 2 then
+        	if vision and vision - GetTime() &amp;lt;= 2
+        	and PQR_SpellAvailable(PQ_AMS) then
         		CastSpellByName(GetSpellInfo(PQ_AMS), &amp;quot;player&amp;quot;)
         		return true
         	end
@@ -532,6 +535,9 @@ for i=1,4 do
         		if impalingDebuff and impalingDebuff - GetTime() &amp;lt; 5 then
         			if PQ_CanCast
         			and PQ_CanImpalingSpear then
+        				if GetSpellInfo(PQ_ImpalingSpear) == UnitCastingInfo(&amp;quot;player&amp;quot;) then
+        					return true -- pause rotation while casting Impaling Spear
+        				end
         				RunMacroText(&amp;quot;/target [@focus]&amp;quot;)
         				RunMacroText(&amp;quot;/click ExtraActionButton1&amp;quot;)
         				RunMacroText(&amp;quot;/targetlasttarget&amp;quot;)
@@ -549,9 +555,10 @@ for i=1,4 do
         
       	elseif npcID == 60583 or npcID == 60583 or npcID == 60585 then -- Protectors
         
-        	local prison = select(7, UnitDebuffID(&amp;quot;player&amp;quot;, 131931)) -- Lightning Prison
+        	local prison = select(7, UnitDebuffID(&amp;quot;player&amp;quot;, 111850)) -- Lightning Prison
         
-        	if prison and prison - GetTime() &amp;lt;= 2 then
+        	if prison and prison - GetTime() &amp;lt;= 2
+        	and PQR_SpellAvailable(PQ_AMS) then
         		CastSpellByName(GetSpellInfo(PQ_AMS), &amp;quot;player&amp;quot;)
         		return true
         	end
@@ -576,7 +583,7 @@ for i=1,4 do
                 --interrupt self if casting amber explosion
                 if playerCasting == amberExplosion then
                     --Press the 2nd button (Struggle for Control)
-                    RunMacroText(&amp;quot;/click [overridebar][vehicleui][possessbar,@vehicle,exists]OverrideActionBarButton2&amp;quot;)
+                    RunMacroText(&amp;quot;/click &amp;quot;..PQR_OverrideActionBarButton2)
                     return true
                 end
                 
@@ -584,7 +591,7 @@ for i=1,4 do
                 if bossCasting and bossCasting == amberExplosion then
                     TargetUnit(bossCheck)
                     --Press the 1st button (Amber Strike)
-                    RunMacroText(&amp;quot;/click [overridebar][vehicleui][possessbar,@vehicle,exists]OverrideActionBarButton1&amp;quot;)
+                    RunMacroText(&amp;quot;/click &amp;quot;..PQR_OverrideActionBarButton1)
                     return true
                 end
                 
@@ -693,7 +700,7 @@ for i=1,4 do
     end
 end
 
-local returnSoul = select(7,UnitDebuffID(&amp;quot;player&amp;quot;,116161))
+local returnSoul = select(7 ,UnitDebuffID(&amp;quot;player&amp;quot;, 116161))
 if returnSoul and returnSoul - GetTime() &amp;lt;= 2 then 
     RunMacroText(&amp;quot;/click ExtraActionButton1&amp;quot;) 
 end</Lua><RecastDelay>0</RecastDelay><Target>Target</Target><CancelChannel>False</CancelChannel><SkipUnknown>True</SkipUnknown></Ability></DEATHKNIGHT>
