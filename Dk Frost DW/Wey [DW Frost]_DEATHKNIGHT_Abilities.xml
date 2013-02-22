@@ -2,6 +2,7 @@
 local TargetValidation = TargetValidation
 
 if PQR_SpellAvailable(PQ_Pillar)
+and PQ_CD
 and IsSpellInRange(GetSpellInfo(PQ_PlagueStrike), &amp;quot;target&amp;quot;) == 1 then
 
 	if PQ_HasEngineering == true then
@@ -14,8 +15,9 @@ end</Lua><RecastDelay>0</RecastDelay><Target>Target</Target><CancelChannel>False
 local SpecialUnit = SpecialUnit
 
 if PQ_CanCast
+and PQ_CD
 and PQR_SpellAvailable(PQ_RaiseDead)
-	and (SpecialUnit() or PQ_CD)
+	and (SpecialUnit() or PQ_CD == CD_Auto)
 	and IsSpellInRange(GetSpellInfo(PQ_PlagueStrike), &amp;quot;target&amp;quot;) == 1 then
 		CastSpellByName(GetSpellInfo(PQ_RaiseDead), &amp;quot;player&amp;quot;)
 		
@@ -31,9 +33,10 @@ and PQR_SpellAvailable(PQ_RaiseDead)
 end</Lua><RecastDelay>0</RecastDelay><Target>Target</Target><CancelChannel>False</CancelChannel><SkipUnknown>True</SkipUnknown></Ability><Ability><Name>Empower Rune Weapon</Name><Default>false</Default><SpellID>0</SpellID><Actions></Actions><Lua>local PQ_Empower = PQ_Empower
 
 if PQ_CanCast
+and PQ_CD
 and UnholyRunes == 0 and DeathRunes == 0 and FrostRunes == 0
 and PQR_SpellAvailable(PQ_Empower)
-and (SpecialUnit() or PQ_CD) then
+and (SpecialUnit() or PQ_CD == CD_Auto) then
 	CastSpellByName(GetSpellInfo(PQ_Empower), &amp;quot;player&amp;quot;)
 	return true
 end</Lua><RecastDelay>0</RecastDelay><Target>Target</Target><CancelChannel>False</CancelChannel><SkipUnknown>True</SkipUnknown></Ability><Ability><Name>[Misc] Init</Name><Default>false</Default><SpellID>0</SpellID><Actions></Actions><Lua>-------------------------------------------------------------------------------
@@ -92,12 +95,15 @@ end
 if IsRightControlKeyDown() and not GetCurrentKeyBoardFocus() and GetTime() - PQ_CDTimer &amp;gt; 1 then
 	PQ_CDTimer = GetTime()
 	
-	if PQ_CD then
-		PQ_CD = false
-		PQR_WriteToChat(&amp;quot;|cff347C2CCooldown Mode: |cffDC143CBoss Only|cffffffff&amp;quot;, &amp;quot;Notice&amp;quot;)
+	if not PQ_CD then
+		PQ_CD = CD_BossOnly
+		PQR_WriteToChat(&amp;quot;|cff347C2CCooldown Mode: |cff79BAECBoss Only|cffffffff&amp;quot;, &amp;quot;Notice&amp;quot;)
+	elseif PQ_CD == CD_BossOnly then
+		PQ_CD = CD_Auto
+		PQR_WriteToChat(&amp;quot;|cff347C2CCooldown Mode: |cff006400On|cffffffff&amp;quot;, &amp;quot;Notice&amp;quot;)
 	else
-		PQ_CD = true
-		PQR_WriteToChat(&amp;quot;|cff347C2CCooldown Mode: |cff79BAECOn|cffffffff&amp;quot;, &amp;quot;Notice&amp;quot;)
+		PQ_CD = false
+		PQR_WriteToChat(&amp;quot;|cff347C2CCooldown Mode: |cffDC143COff|cffffffff&amp;quot;, &amp;quot;Notice&amp;quot;)
 	end
 end
 

@@ -2,7 +2,7 @@ if not PQR_LoadedDataFile then
 	PQR_LoadedDateFile = 1
 	PQ_PlayerName = UnitName("player")
 	PQ_PlayerRace = select(2, UnitRace("player"))
-	print("|cffFFBE69Frost DW Data File - Feb 19, 2013|cffffffff")
+	print("|cffFFBE69Frost DW Data File - Feb 22, 2013|cffffffff")
 end
 
 TargetValidation = nil
@@ -237,8 +237,11 @@ PQ_FrostFever = 55095
 PQ_BloodPlague = 55078
 
 -- Switch
+CD_BossOnly = 1
+CD_Auto = 2
+
 PQ_ShouldPestilence = false
-PQ_CD = false
+PQ_CD = CD_BossOnly
 PQ_CDTimer = 0
 PQ_HB = true
 PQ_HBTimer = 0
