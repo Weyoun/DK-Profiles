@@ -226,11 +226,15 @@ PQ_DeathGrip = 49576
 PQ_IceboundFortitude = 48792
 PQ_DeathStrike = 49998
 PQ_IcyTouch = 45477
+PQ_UnholyBlight = 115989
+PQ_RunicEmpowerment = 81229
+PQ_RunicCorruption = 51462
 
 -- Buffs
 PQ_Rime = 59052
 PQ_KillingMachine = 51124
 PQ_BloodCharge = 114851
+PQ_RunicCorruptionBuff = 51460
 
 -- Debuffs
 PQ_FrostFever = 55095
@@ -314,7 +318,8 @@ function PQ_Frame_OnEvent(self, event, ...)
 	and spellID ~= PQ_Berserking
 	and spellID ~= PQ_WillOfTheForsaken
 	and spellID ~= PQ_Lifeblood
-	and spellID ~= PQ_SynapseSprings then
+	and spellID ~= PQ_SynapseSprings
+	and spellID ~= PQ_UnholyBlight then
 		PQ_GCD = GetTime() + 0.7
 		PQ_CanCast = false
 	end
