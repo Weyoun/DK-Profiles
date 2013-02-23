@@ -328,7 +328,7 @@ function PQ_Frame_OnEvent(self, event, ...)
 	elseif spellID == PQ_ImpalingSpear then
 		PQ_ImpalingSpearCD = GetTime() + 5
 		PQ_CanImpalingSpear = false
-	elseif sleppID == PQ_SynapseSprings then
+	elseif spellID == PQ_SynapseSprings then
 		PQ_HasEngineering = true
 	end
 end
