@@ -1,5 +1,14 @@
+--IF YOU ARE VIEWING THIS FILE IN A WEB BROWSER
+
+--OPEN PQR, OPEN "ROTATION EDITOR", SELECT "DOWNLOAD PROFILE FROM URL"
+
+--AND PASTE THE URL FOR THIS WEBPAGE THERE.
+
+--ALL FILES BELOW WILL AUTOMATICALLY BE DOWNLOADED AND INSTALLED FOR YOU.
+
 http://raw.github.com/Weyoun/DK-Profiles/data/Data/PQR_Frost_DW_Wey_Data.lua
-http://raw.github.com/Weyoun/DK-Profiles/frost_2h/DK%20Frost%202H/Wey%20%5B2H%20Frost%5D_DEATHKNIGHT_Abilities.xml
-http://raw.github.com/Weyoun/DK-Profiles/frost_2h/DK%20Frost%202H/Wey%20%5B2H%20Frost%5D_DEATHKNIGHT_Rotations.xml
+
+http://raw.github.com/Weyoun/DK-Profiles/frost_2h/DK Frost 2H/Wey [2H Frost]_DEATHKNIGHT_Abilities.xml
+http://raw.github.com/Weyoun/DK-Profiles/frost_2h/DK Frost 2H/Wey [2H Frost]_DEATHKNIGHT_Rotations.xml
 
 
