@@ -291,6 +291,7 @@ local PQ_FrostFever = PQ_FrostFever
 local TargetValidation = TargetValidation
 
 if PQ_CanCast
+and PQ_OutbreakCD - GetTime() &amp;gt; 5 -- Outbreak is more than 5 seconds on CD
 and PQ_HB and not UnitDebuffID(&amp;quot;target&amp;quot;, PQ_FrostFever, &amp;quot;player&amp;quot;)
 and TargetValidation(&amp;quot;target&amp;quot;, PQ_HowlingBlast) then
 	CastSpellByName(GetSpellInfo(PQ_HowlingBlast), &amp;quot;target&amp;quot;)
