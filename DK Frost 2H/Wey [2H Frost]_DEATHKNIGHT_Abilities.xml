@@ -290,6 +290,8 @@ end</Lua><RecastDelay>0</RecastDelay><Target>Target</Target><CancelChannel>False
 local PQ_FrostFever = PQ_FrostFever
 local TargetValidation = TargetValidation
 
+if UnitBuffID(&amp;quot;player&amp;quot;, PQ_UnholyBlight) then return false end
+
 if PQ_CanCast
 and PQ_OutbreakCD - GetTime() &amp;gt; 5 -- Outbreak is more than 5 seconds on CD
 and PQ_HB and not UnitDebuffID(&amp;quot;target&amp;quot;, PQ_FrostFever, &amp;quot;player&amp;quot;)
@@ -299,6 +301,8 @@ and TargetValidation(&amp;quot;target&amp;quot;, PQ_HowlingBlast) then
 end</Lua><RecastDelay>0</RecastDelay><Target>Target</Target><CancelChannel>False</CancelChannel><SkipUnknown>True</SkipUnknown></Ability><Ability><Name>Plague Strike (no debuff)</Name><Default>false</Default><SpellID>0</SpellID><Actions></Actions><Lua>local PQ_PlagueStrike = PQ_PlagueStrike
 local PQ_BloodPlague = PQ_BloodPlague
 local TargetValidation = TargetValidation
+
+if UnitBuffID(&amp;quot;player&amp;quot;, PQ_UnholyBlight) then return false end
 
 if PQ_CanCast
 and PQ_OutbreakCD - GetTime() &amp;gt; 5 -- Outbreak is more than 5 seconds on CD
@@ -332,10 +336,25 @@ else
 		PQ_ShouldPestilence = true
 		return true
 	end
-end</Lua><RecastDelay>0</RecastDelay><Target>Target</Target><CancelChannel>False</CancelChannel><SkipUnknown>True</SkipUnknown></Ability><Ability><Name>Debug</Name><Default>false</Default><SpellID>0</SpellID><Actions></Actions><Lua>if IsLeftShiftKeyDown() and not GetCurrentKeyBoardFocus() then
+end</Lua><RecastDelay>0</RecastDelay><Target>Target</Target><CancelChannel>False</CancelChannel><SkipUnknown>True</SkipUnknown></Ability><Ability><Name>Debug</Name><Default>false</Default><SpellID>0</SpellID><Actions></Actions><Lua>local PQ_RaiseDead = PQ_RaiseDead
+local SpecialUnit = SpecialUnit
 
-print(&amp;quot;Frost Strike &amp;quot;..tostring(PQR_SpellAvailable(PQ_FrostStrike)))
-
+if PQ_CanCast
+and PQ_CD
+and PQR_SpellAvailable(PQ_RaiseDead)
+	and (SpecialUnit() or PQ_CD == CD_Auto)
+	and IsSpellInRange(GetSpellInfo(PQ_PlagueStrike), &amp;quot;target&amp;quot;) == 1 then
+		CastSpellByName(GetSpellInfo(PQ_RaiseDead), &amp;quot;player&amp;quot;)
+		
+		if PQ_Has2MinCD == true then
+			for _,spell in ipairs(PQ_2MinCDList) do
+				if IsSpellKnown(spell) then
+					CastSpellByName(GetSpellInfo(spell), &amp;quot;player&amp;quot;)
+				end
+			end
+		end
+		
+		return true
 end</Lua><RecastDelay>0</RecastDelay><Target>Target</Target><CancelChannel>False</CancelChannel><SkipUnknown>True</SkipUnknown></Ability><Ability><Name>Plague Leech</Name><Default>false</Default><SpellID>0</SpellID><Actions></Actions><Lua>local PQ_PlagueLeech = PQ_PlagueLeech
 local PQ_FrostFever = PQ_FrostFever
 local PQ_BloodPlague = PQ_BloodPlague
