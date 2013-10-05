@@ -2,7 +2,7 @@ if not PQR_LoadedDataFile then
 	PQR_LoadedDateFile = 1
 	PQ_PlayerName = UnitName("player")
 	PQ_PlayerRace = select(2, UnitRace("player"))
-	print("|cffFFBE69Frost DW Data File - Feb 22, 2013|cffffffff")
+	print("|cffFFBE69Frost DW Data File - Oct 05, 2013|cffffffff")
 end
 
 TargetValidation = nil
@@ -41,6 +41,54 @@ function GlyphCheck(glyphid)
 		end
 	end
 	return false
+end
+
+CastSpell = nil
+function CastSpell(id, t)
+	CastSpellByName(id, t)
+	PQ_ShouldWait = true
+	PQ_WaitCD = GetTime() + 0.05
+end
+
+PQ_FaceRange = math.rad(45) -- 45 degree facing limit
+CheckFacing = nil
+function CheckFacing(t)
+	t = t or "target"
+	
+	if not UnitExists(t) then return false end
+	
+	local rad, lower, upper = nil, nil, nil
+	local x1, y1 = GetPlayerMapPosition("player")
+	local x2, y2 = GetPlayerMapPosition(t)
+	local face = GetPlayerFacing()
+	
+	local x = x2 - x1
+	local y = y2 - y1
+	
+	if (x == 0 and y == 0) then return true end -- we are directly inside the target ... return true
+	
+	if (x == 0) then
+		if (y > 0) then
+			rad = 0
+		elseif (y < 0) then
+			rad = math.pi
+		end
+	elseif (y < 0) then
+		rad = math.pi - math.atan(x/y)
+	elseif (x > 0) then
+		rad = 2*math.pi - math.atan(x/y)
+	else
+		rad = math.atan(x/y) * -1
+	end
+	
+	lower = (rad - PQ_FaceRange) % (2*math.pi)
+	upper = (rad + PQ_FaceRange) % (2*math.pi)
+	
+	if (lower < upper) then
+	  return (face < upper and face > lower)
+	else
+	  return (face > lower) or (face < upper)
+	end
 end
 
 PQ_BossUnits = {
@@ -229,6 +277,7 @@ PQ_IcyTouch = 45477
 PQ_UnholyBlight = 115989
 PQ_RunicEmpowerment = 81229
 PQ_RunicCorruption = 51462
+PQ_Asphyxiate = 108194
 
 -- Buffs
 PQ_Rime = 59052
@@ -245,6 +294,7 @@ CD_BossOnly = 1
 CD_Auto = 2
 
 PQ_ShouldPestilence = false
+PQ_PestilenceCD = 0
 PQ_CD = CD_BossOnly
 PQ_CDTimer = 0
 PQ_HB = true
@@ -258,8 +308,10 @@ PQ_DNDTimer = 0
 PQ_SoulReaperCD = 0
 PQ_GCD = 0
 PQ_BTCD = 0
+PQ_WaitCD = 0
 PQ_OutbreakCD = 0
 PQ_ImpalingSpearCD = 0
+PQ_MindFreezeCD = 0
 
 -- Items
 PQ_HealthStoneItem = 5512
@@ -293,7 +345,9 @@ PQ_2MinCDList = {
 PQ_Frame = nil
 PQ_CanCast = true
 PQ_CanBT = true
+PQ_ShouldWait = false
 PQ_CanImpalingSpear = true
+PQ_CanMindFreeze = true
 function PQ_Frame_OnEvent(self, event, ...)
 	if ... ~= "player" then return end
 	
@@ -328,6 +382,7 @@ function PQ_Frame_OnEvent(self, event, ...)
 		PQ_OutbreakCD = GetTime() + 60
 	elseif spellID == PQ_Pestilence then
 		PQ_ShouldPestilence = false
+		PQ_PestilenceCD = GetTime() + 28
 	elseif spellID == PQ_SoulReaper then
 		PQ_SoulReaperCD = GetTime() + 6
 	elseif spellID == PQ_ImpalingSpear then
@@ -335,5 +390,8 @@ function PQ_Frame_OnEvent(self, event, ...)
 		PQ_CanImpalingSpear = false
 	elseif spellID == PQ_SynapseSprings then
 		PQ_HasEngineering = true
+	elseif spellID == PQ_MindFreeze then
+		PQ_MindFreezeCD = GetTime() + 15
+		PQ_CanMindFreeze = false
 	end
 end
