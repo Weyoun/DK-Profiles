@@ -46,7 +46,7 @@ end</Lua><RecastDelay>0</RecastDelay><Target>Target</Target><CancelChannel>False
 if PQR_RotationStarted then
 	PQR_RotationStarted = false
 	
-	PQR_UI = &amp;quot;Blizzard&amp;quot; -- Options: Blizzard, ElvUI
+	PQR_UI = &amp;quot;ElvUI&amp;quot; -- Options: Blizzard, ElvUI
 	--/run print( GetMouseFocus():GetName() or &amp;apos;unknown&amp;apos; )
 	
 	if PQR_UI == &amp;quot;ElvUI&amp;quot; then
@@ -147,9 +147,14 @@ if IsLeftAltKeyDown() and not GetCurrentKeyBoardFocus() and GetTime() - PQ_DNDTi
 end
 
 if IsMounted() then return true end
-if PQ_CanCast == false and PQ_GCD &amp;lt;= GetTime() then PQ_CanCast = true end
-if PQ_CanBT == false and PQ_BTCD &amp;lt;= GetTime() then PQ_CanBT = true end
-if PQ_CanImpalingSpear == false and PQ_ImpalingSpearCD &amp;lt;= GetTime() then PQ_CanImpalingSpear = true end
+
+currentTime = GetTime()
+
+if PQ_CanCast == false and PQ_GCD &amp;lt;= currentTime then PQ_CanCast = true end
+if PQ_CanBT == false and PQ_BTCD &amp;lt;= currentTime then PQ_CanBT = true end
+if PQ_CanImpalingSpear == false and PQ_ImpalingSpearCD &amp;lt;= currentTime then PQ_CanImpalingSpear = true end
+if PQ_CanMindFreeze == false and PQ_MindFreezeCD &amp;lt;= currentTime then PQ_CanMindFreeze = true end
+if PQ_ShouldPestilence == false and PQ_PestilenceCD &amp;lt;= currentTime then PQ_ShouldPestilence = true end
 
 RunicPower = UnitPower(&amp;quot;player&amp;quot;)
 PlayerHP   = 100 * UnitHealth(&amp;quot;player&amp;quot;) / UnitHealthMax(&amp;quot;player&amp;quot;)
@@ -159,6 +164,7 @@ UnholyRunes = 0
 FrostRunes = 0
 DeathRunes = 0
 FullyDepleted = 0
+HalfDepleted = 0
 
 for i=1,6,2 do
 	local type = GetRuneType(i)
@@ -170,7 +176,11 @@ for i=1,6,2 do
 	if FullyDepleted == 0
 	and cd == false
 	and cd2 == false then
-		FullyDepleted = 1
+		if HalfDepleted == 0 then
+			HalfDepleted = 1
+		else
+			FullyDepleted = 1
+		end
 	end
 	
 	if cd == true then
@@ -252,6 +262,7 @@ local PQ_HowlingBlast = PQ_HowlingBlast
 
 if PQ_DND
 and PQ_CanCast
+and UnholyRunes == 1
 and UnitExists(&amp;quot;target&amp;quot;)
 and PQR_SpellAvailable(PQ_DnD)
 and IsSpellInRange(GetSpellInfo(PQ_HowlingBlast), &amp;quot;target&amp;quot;) == 1 then
@@ -319,11 +330,10 @@ local PQ_BloodPlague = PQ_BloodPlague
 local TargetValidation = TargetValidation
 
 if PQ_CanCast
-and PQ_OutbreakCD - GetTime() &amp;gt; 5 -- Outbreak is more than 5 seconds on CD
 and not UnitDebuffID(&amp;quot;target&amp;quot;, PQ_BloodPlague, &amp;quot;player&amp;quot;)
+and UnholyRunes &amp;gt; 0
 and TargetValidation(&amp;quot;target&amp;quot;, PQ_PlagueStrike) then
 	CastSpellByName(GetSpellInfo(PQ_PlagueStrike), &amp;quot;target&amp;quot;)
-	PQ_ShouldPestilence = true
 	return true
 end</Lua><RecastDelay>0</RecastDelay><Target>Target</Target><CancelChannel>False</CancelChannel><SkipUnknown>True</SkipUnknown></Ability><Ability><Name>Outbreak</Name><Default>false</Default><SpellID>0</SpellID><Actions></Actions><Lua>local PQ_FrostFever = PQ_FrostFever
 local PQ_BloodPlague = PQ_BloodPlague
@@ -350,26 +360,16 @@ else
 		PQ_ShouldPestilence = true
 		return true
 	end
-end</Lua><RecastDelay>0</RecastDelay><Target>Target</Target><CancelChannel>False</CancelChannel><SkipUnknown>True</SkipUnknown></Ability><Ability><Name>Debug</Name><Default>false</Default><SpellID>0</SpellID><Actions></Actions><Lua>if UnitExists(&amp;quot;focus&amp;quot;) then
-	local impalingDebuff = select(7, UnitDebuffID(&amp;quot;focus&amp;quot;, PQ_ImpalingSpear, &amp;quot;player&amp;quot;))
-        		
-    if impalingDebuff and impalingDebuff - GetTime() &amp;lt; 43 then
-		if PQ_CanCast
-		and not UnitCastingInfo(&amp;quot;player&amp;quot;)
-        and PQ_CanImpalingSpear then
-        	print(&amp;quot;Casting Spear&amp;quot;)
-        	RunMacroText(&amp;quot;/target [@focus]&amp;quot;)
-        	RunMacroText(&amp;quot;/click ExtraActionButton1&amp;quot;)
-        	RunMacroText(&amp;quot;/targetlasttarget&amp;quot;)
-        	return true
-        	end
-    end
+end</Lua><RecastDelay>0</RecastDelay><Target>Target</Target><CancelChannel>False</CancelChannel><SkipUnknown>True</SkipUnknown></Ability><Ability><Name>Debug</Name><Default>false</Default><SpellID>0</SpellID><Actions></Actions><Lua>if (IsLeftShiftKeyDown() and not GetCurrentKeyBoardFocus()) then
+	if UnitExists(&amp;quot;focus&amp;quot;) then
+		print(UnitCastingInfo(&amp;quot;focus&amp;quot;))
+	end
 end</Lua><RecastDelay>0</RecastDelay><Target>Target</Target><CancelChannel>False</CancelChannel><SkipUnknown>True</SkipUnknown></Ability><Ability><Name>Blood Tap (&amp;gt;10 and RP &amp;gt; 76 or KM)</Name><Default>false</Default><SpellID>0</SpellID><Actions></Actions><Lua>local PQ_BloodCharge = PQ_BloodCharge
 local PQ_KillingMachine = PQ_KillingMachine
 local PQ_BloodTap = PQ_BloodTap
 local TargetValidation = TargetValidation
 
-if FullyDepleted == 0 then return false end
+if HalfDepleted == 0 then return false end
 
 local charges = select(4, UnitBuffID(&amp;quot;player&amp;quot;, PQ_BloodCharge))
 
@@ -407,42 +407,24 @@ and TargetValidation(&amp;quot;target&amp;quot;, PQ_HowlingBlast) then
 end</Lua><RecastDelay>0</RecastDelay><Target>Target</Target><CancelChannel>False</CancelChannel><SkipUnknown>True</SkipUnknown></Ability><Ability><Name>Plague Leech</Name><Default>false</Default><SpellID>0</SpellID><Actions></Actions><Lua>local PQ_PlagueLeech = PQ_PlagueLeech
 local PQ_FrostFever = PQ_FrostFever
 local PQ_BloodPlague = PQ_BloodPlague
-local PQ_Outbreak = PQ_Outbreak
 local TargetValidation = TargetValidation
 
 if PQ_CanCast == false then return false end
 if not PQR_SpellAvailable(PQ_PlagueLeech) then return false end
 if FullyDepleted == 0 then return false end
 
-local FF,_,_,_,_,_,FFtimer = UnitDebuffID(&amp;quot;target&amp;quot;,PQ_FrostFever,&amp;quot;player&amp;quot;)
-local BP,_,_,_,_,_,BPtimer = UnitDebuffID(&amp;quot;target&amp;quot;,PQ_BloodPlague,&amp;quot;player&amp;quot;)
-
-if FF and BP then
-	local Ostart, Oduration, Oenabled = GetSpellCooldown(PQ_Outbreak)
-	
-	if Ostart == 0 then
-		if TargetValidation(&amp;quot;target&amp;quot;, PQ_PlagueLeech) then
-			CastSpellByName(GetSpellInfo(PQ_PlagueLeech), &amp;quot;target&amp;quot;)
-			return true
-		end
-	end
-	
-	local Ocooldown = (Ostart + Oduration - GetTime())
-	
-	if (BPtimer - GetTime() &amp;lt; 3
-	or Ocooldown &amp;lt; 1
-	or FFtimer - GetTime() &amp;lt; 3)
-	and TargetValidation(&amp;quot;target&amp;quot;, PQ_PlagueLeech) then
-		CastSpellByName(GetSpellInfo(PQ_PlagueLeech), &amp;quot;target&amp;quot;)
-		return true
-	end
+if UnitDebuffID(&amp;quot;target&amp;quot;,PQ_FrostFever,&amp;quot;player&amp;quot;)
+and UnitDebuffID(&amp;quot;target&amp;quot;,PQ_BloodPlague,&amp;quot;player&amp;quot;)
+and TargetValidation(&amp;quot;target&amp;quot;, PQ_PlagueLeech) then
+	CastSpellByName(GetSpellInfo(PQ_PlagueLeech), &amp;quot;target&amp;quot;)
+	return true
 end</Lua><RecastDelay>0</RecastDelay><Target>Target</Target><CancelChannel>False</CancelChannel><SkipUnknown>True</SkipUnknown></Ability><Ability><Name>Blood Tap (Soul Reaper)</Name><Default>false</Default><SpellID>0</SpellID><Actions></Actions><Lua>local PQ_BloodTap = PQ_BloodTap
 local PQ_SoulReaper = PQ_SoulReaper
 local PQ_BloodCharge = PQ_BloodCharge
 
-if FullyDepleted == 0 then return false end
+if HalfDepleted == 0 then return false end
 
-if TargetHP &amp;lt;= 35 then
+if TargetHP &amp;lt;= 45 then
 	local charges = select(4, UnitBuffID(&amp;quot;player&amp;quot;, PQ_BloodCharge))
 	
 	if PQ_CanBT
@@ -457,7 +439,7 @@ end</Lua><RecastDelay>0</RecastDelay><Target>Target</Target><CancelChannel>False
 local TargetValidationMelee = TargetValidationMelee
 
 if PQ_CanCast
-and TargetHP &amp;lt;= 35
+and TargetHP &amp;lt;= 45
 and TargetValidationMelee(&amp;quot;target&amp;quot;, PQ_SoulReaper) then
 	CastSpellByName(GetSpellInfo(PQ_SoulReaper), &amp;quot;target&amp;quot;)
 	return true
@@ -466,13 +448,13 @@ local PQ_KillingMachine = PQ_KillingMachine
 local PQ_BloodTap = PQ_BloodTap
 local TargetValidation = TargetValidation
 
-if FullyDepleted == 0 then return false end
+if HalfDepleted == 0 then return false end
 
 local charges = select(4, UnitBuffID(&amp;quot;player&amp;quot;, PQ_BloodCharge))
 
 if PQ_CanBT
 and charges and charges &amp;gt;= 5 then
-	if TargetHP &amp;gt; 35 or charges &amp;gt;= 8 then
+	if TargetHP &amp;gt; 45 or charges &amp;gt;= 8 then
 		PQ_BTCD = GetTime() + 0.1
 		PQ_CanBT = false
 		CastSpellByName(GetSpellInfo(PQ_BloodTap), &amp;quot;player&amp;quot;)
@@ -485,10 +467,8 @@ local TargetValidationMelee = TargetValidationMelee
 
 if PQ_CanCast
 and PQ_ShouldPestilence == true
-and UnitDebuffID(&amp;quot;target&amp;quot;,PQ_FrostFever,&amp;quot;player&amp;quot;)
 and UnitDebuffID(&amp;quot;target&amp;quot;,PQ_BloodPlague,&amp;quot;player&amp;quot;)
 and TargetValidationMelee(&amp;quot;target&amp;quot;, PQ_Pestilence) then
---	SpellCancelQueuedSpell()
 	CastSpellByName(GetSpellInfo(PQ_Pestilence), &amp;quot;target&amp;quot;)
 	return true
 end</Lua><RecastDelay>0</RecastDelay><Target>Target</Target><CancelChannel>False</CancelChannel><SkipUnknown>True</SkipUnknown></Ability><Ability><Name>Selfheal</Name><Default>false</Default><SpellID>0</SpellID><Actions></Actions><Lua>--if PlayerHP &amp;lt;= 50 then
@@ -532,6 +512,8 @@ if PlayerHP &amp;lt;= 45 then
 end</Lua><RecastDelay>0</RecastDelay><Target>Target</Target><CancelChannel>False</CancelChannel><SkipUnknown>True</SkipUnknown></Ability><Ability><Name>[Misc] Bossmod</Name><Default>false</Default><SpellID>0</SpellID><Actions></Actions><Lua>local PQ_IcyTouch = PQ_IcyTouch
 local PQ_ImpalingSpear = PQ_ImpalingSpear
 local PQ_AMS = PQ_AMS
+local GetSpellInfo = GetSpellInfo
+local UnitCastingInfo = UnitCastingInfo
 local TryPurge = true
 
 --Implement PQR_resumeAttack.. this is used to prevent
@@ -560,10 +542,59 @@ for i=1,4 do
         local icyPurge = GlyphCheck(58631)
         
         ------------------------------------------------------------
+        ----------------------- Tier 15 Raids ----------------------
+        ------------------------------------------------------------
+        
+        if npcID == 69078 or npcID == 69134 or npcID == 69131 or npcID == 69132 then -- Council
+        
+	        local sandBolt = GetSpellInfo(136189)
+	        local wrathOfLoa = GetSpellInfo(137344)
+	        
+	        if PQ_CanMindFreeze
+	        and (bossCasting == sandBolt or bossCasting == wrathOfLoa)
+	        and IsSpellInRange(GetSpellInfo(PQ_PlagueStrike), bossCheck) == 1 then
+	        	CastSpellByName(GetSpellInfo(PQ_MindFreeze), bossCheck)
+	        	return true
+	        end
+	        
+	        local targetCasting = UnitCastingInfo(&amp;quot;target&amp;quot;)
+	        
+	        if PQ_CanMindFreeze
+	        and (targetCasting == sandBolt or targetCasting == wrathOfLoa)
+	        and IsSpellInRange(GetSpellInfo(PQ_PlagueStrike), &amp;quot;target&amp;quot;) == 1 then
+	        	CastSpellByName(GetSpellInfo(PQ_MindFreeze), &amp;quot;target&amp;quot;)
+	        	return true
+	        end
+        
+        elseif npcID == 68476 then -- Horridon
+        	
+        	local venomBolt = GetSpellInfo(136587)
+        	local chainLightning = GetSpellInfo(136480)
+        	
+        	if UnitExists(&amp;quot;focus&amp;quot;)
+        	and (UnitCastingInfo(&amp;quot;focus&amp;quot;) == venomBolt
+        	or UnitCastingInfo(&amp;quot;focus&amp;quot;) == chainLightning) then
+	       		if PQR_SpellAvailable(PQ_MindFreeze)
+	       		and IsSpellInRange(GetSpellInfo(PQ_PlagueStrike), &amp;quot;focus&amp;quot;) == 1 then
+	       			CastSpellByName(GetSpellInfo(PQ_MindFreeze), &amp;quot;focus&amp;quot;)
+	        		return true
+	        	end
+        	end
+        	
+        	if UnitCastingInfo(&amp;quot;target&amp;quot;) == venomBolt
+        	or UnitCastingInfo(&amp;quot;target&amp;quot;) == chainLightning then
+	       		if PQR_SpellAvailable(PQ_MindFreeze)
+	       		and IsSpellInRange(GetSpellInfo(PQ_PlagueStrike), &amp;quot;target&amp;quot;) == 1 then
+	       			CastSpellByName(GetSpellInfo(PQ_MindFreeze), &amp;quot;target&amp;quot;)
+	        		return true
+	        	end
+       		end
+        
+        ------------------------------------------------------------
         ----------------------- Tier 14 Raids ----------------------
         ------------------------------------------------------------
         
-        if npcID == 62837 then -- Grand Empress Shek&amp;apos;zeer
+        elseif npcID == 62837 then -- Grand Empress Shek&amp;apos;zeer
         
         	local vision = select(7, UnitDebuffID(&amp;quot;player&amp;quot;, 124862)) -- Vision of Demise
         
@@ -609,13 +640,6 @@ for i=1,4 do
        		if UnitCastingInfo(&amp;quot;target&amp;quot;) == mending
        		and PQR_SpellAvailable(PQ_MindFreeze) then
        			CastSpellByName(GetSpellInfo(PQ_MindFreeze), &amp;quot;target&amp;quot;)
-        		return true
-       		end
-       		
-       		if UnitExists(&amp;quot;mouseover&amp;quot;)
-       		and UnitCastingInfo(&amp;quot;mouseover&amp;quot;) == mending
-       		and PQR_SpellAvailable(PQ_MindFreeze) then
-       			CastSpellByName(GetSpellInfo(PQ_MindFreeze), &amp;quot;mouseover&amp;quot;)
         		return true
        		end
        		
@@ -790,4 +814,81 @@ end
 local returnSoul = select(7 ,UnitDebuffID(&amp;quot;player&amp;quot;, 116161))
 if returnSoul and returnSoul - GetTime() &amp;lt;= 2 then 
     RunMacroText(&amp;quot;/click ExtraActionButton1&amp;quot;) 
+end</Lua><RecastDelay>0</RecastDelay><Target>Target</Target><CancelChannel>False</CancelChannel><SkipUnknown>True</SkipUnknown></Ability><Ability><Name>Blood Tap (filler)</Name><Default>false</Default><SpellID>0</SpellID><Actions></Actions><Lua>local PQ_BloodCharge = PQ_BloodCharge
+local PQ_KillingMachine = PQ_KillingMachine
+local PQ_BloodTap = PQ_BloodTap
+local TargetValidation = TargetValidation
+
+if HalfDepleted == 0 then return false end
+
+local charges = select(4, UnitBuffID(&amp;quot;player&amp;quot;, PQ_BloodCharge))
+
+if PQ_CanBT
+and charges and charges &amp;gt;= 5 then
+	PQ_BTCD = GetTime() + 0.1
+	PQ_CanBT = false
+	CastSpellByName(GetSpellInfo(PQ_BloodTap), &amp;quot;player&amp;quot;)
+	return true
+end</Lua><RecastDelay>0</RecastDelay><Target>Target</Target><CancelChannel>False</CancelChannel><SkipUnknown>True</SkipUnknown></Ability><Ability><Name>Obliterate (Unholy &amp;gt; 0 and no KM)</Name><Default>false</Default><SpellID>0</SpellID><Actions></Actions><Lua>local PQ_Obliterate = PQ_Obliterate
+local TargetValidationMelee = TargetValidationMelee
+local PQ_KillingMachine = PQ_KillingMachine
+
+if PQ_CanCast
+and UnholyRunes &amp;gt; 0
+and not UnitBuffID(&amp;quot;player&amp;quot;, PQ_KillingMachine)
+and TargetValidationMelee(&amp;quot;target&amp;quot;, PQ_Obliterate) then
+	CastSpellByName(GetSpellInfo(PQ_Obliterate), &amp;quot;target&amp;quot;)
+	return true
+end</Lua><RecastDelay>0</RecastDelay><Target>Target</Target><CancelChannel>False</CancelChannel><SkipUnknown>True</SkipUnknown></Ability><Ability><Name>Blood Tap (&amp;gt;10)</Name><Default>false</Default><SpellID>0</SpellID><Actions></Actions><Lua>local PQ_BloodCharge = PQ_BloodCharge
+local PQ_BloodTap = PQ_BloodTap
+local TargetValidation = TargetValidation
+
+if HalfDepleted == 0 then return false end
+
+local charges = select(4, UnitBuffID(&amp;quot;player&amp;quot;, PQ_BloodCharge))
+
+if PQ_CanBT
+and charges and charges &amp;gt; 10 then
+	PQ_BTCD = GetTime() + 0.1
+	PQ_CanBT = false
+	CastSpellByName(GetSpellInfo(PQ_BloodTap), &amp;quot;player&amp;quot;)
+	return true
+end</Lua><RecastDelay>0</RecastDelay><Target>Target</Target><CancelChannel>False</CancelChannel><SkipUnknown>True</SkipUnknown></Ability><Ability><Name>Plague Strike (Unholy = 2)</Name><Default>false</Default><SpellID>0</SpellID><Actions></Actions><Lua>local PQ_PlagueStrike = PQ_PlagueStrike
+local TargetValidation = TargetValidation
+
+if PQ_CanCast
+and UnholyRunes == 2
+and TargetValidation(&amp;quot;target&amp;quot;, PQ_PlagueStrike) then
+	CastSpellByName(GetSpellInfo(PQ_PlagueStrike), &amp;quot;target&amp;quot;)
+	return true
+end</Lua><RecastDelay>0</RecastDelay><Target>Target</Target><CancelChannel>False</CancelChannel><SkipUnknown>True</SkipUnknown></Ability><Ability><Name>Frost Strike</Name><Default>false</Default><SpellID>0</SpellID><Actions></Actions><Lua>local PQ_FrostStrike = PQ_FrostStrike
+local TargetValidationMelee = TargetValidationMelee
+
+if PQ_CanCast
+and TargetValidationMelee(&amp;quot;target&amp;quot;, PQ_FrostStrike) then
+	CastSpellByName(GetSpellInfo(PQ_FrostStrike), &amp;quot;target&amp;quot;)
+	return true
+end</Lua><RecastDelay>0</RecastDelay><Target>Target</Target><CancelChannel>False</CancelChannel><SkipUnknown>True</SkipUnknown></Ability><Ability><Name>Plague Leech (Unholy = 1)</Name><Default>false</Default><SpellID>0</SpellID><Actions></Actions><Lua>local PQ_PlagueLeech = PQ_PlagueLeech
+local PQ_FrostFever = PQ_FrostFever
+local PQ_BloodPlague = PQ_BloodPlague
+local TargetValidation = TargetValidation
+
+if PQ_CanCast == false then return false end
+if not PQR_SpellAvailable(PQ_PlagueLeech) then return false end
+if FullyDepleted == 0 then return false end
+
+if UnholyRunes == 1
+and UnitDebuffID(&amp;quot;target&amp;quot;,PQ_FrostFever,&amp;quot;player&amp;quot;)
+and UnitDebuffID(&amp;quot;target&amp;quot;,PQ_BloodPlague,&amp;quot;player&amp;quot;)
+and TargetValidation(&amp;quot;target&amp;quot;, PQ_PlagueLeech) then
+	CastSpellByName(GetSpellInfo(PQ_PlagueLeech), &amp;quot;target&amp;quot;)
+	return true
+end</Lua><RecastDelay>0</RecastDelay><Target>Target</Target><CancelChannel>False</CancelChannel><SkipUnknown>True</SkipUnknown></Ability><Ability><Name>Plague Strike (Unholy = 1)</Name><Default>false</Default><SpellID>0</SpellID><Actions></Actions><Lua>local PQ_PlagueStrike = PQ_PlagueStrike
+local TargetValidation = TargetValidation
+
+if PQ_CanCast
+and UnholyRunes == 1
+and TargetValidation(&amp;quot;target&amp;quot;, PQ_PlagueStrike) then
+	CastSpellByName(GetSpellInfo(PQ_PlagueStrike), &amp;quot;target&amp;quot;)
+	return true
 end</Lua><RecastDelay>0</RecastDelay><Target>Target</Target><CancelChannel>False</CancelChannel><SkipUnknown>True</SkipUnknown></Ability></DEATHKNIGHT>
