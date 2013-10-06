@@ -424,7 +424,7 @@ local PQ_BloodCharge = PQ_BloodCharge
 
 if HalfDepleted == 0 then return false end
 
-if TargetHP &amp;lt;= 45 then
+if TargetHP &amp;lt;= 35 then
 	local charges = select(4, UnitBuffID(&amp;quot;player&amp;quot;, PQ_BloodCharge))
 	
 	if PQ_CanBT
@@ -439,7 +439,7 @@ end</Lua><RecastDelay>0</RecastDelay><Target>Target</Target><CancelChannel>False
 local TargetValidationMelee = TargetValidationMelee
 
 if PQ_CanCast
-and TargetHP &amp;lt;= 45
+and TargetHP &amp;lt;= 35
 and TargetValidationMelee(&amp;quot;target&amp;quot;, PQ_SoulReaper) then
 	CastSpellByName(GetSpellInfo(PQ_SoulReaper), &amp;quot;target&amp;quot;)
 	return true
@@ -454,7 +454,7 @@ local charges = select(4, UnitBuffID(&amp;quot;player&amp;quot;, PQ_BloodCharge)
 
 if PQ_CanBT
 and charges and charges &amp;gt;= 5 then
-	if TargetHP &amp;gt; 45 or charges &amp;gt;= 8 then
+	if TargetHP &amp;gt; 35 or charges &amp;gt;= 8 then
 		PQ_BTCD = GetTime() + 0.1
 		PQ_CanBT = false
 		CastSpellByName(GetSpellInfo(PQ_BloodTap), &amp;quot;player&amp;quot;)
